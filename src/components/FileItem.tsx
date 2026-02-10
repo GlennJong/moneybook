@@ -1,20 +1,14 @@
 import { useState } from 'react';
 import { type DriveFile } from '@glennjong/vibe-sheets';
 
-import type { Data, RawData } from '../types';
+import type { Data } from '../types';
+import { fetchScript } from '../common/fetch';
 
-const fetchScript = async (url: string, method: 'GET' | 'POST' = 'GET', body?: RawData): Promise<Data[]> => {
-  const options: RequestInit = { method };
-  if (method === 'POST' && body) options.body = JSON.stringify(body);
-  const res = await fetch(url, options);
-  const { data }: { data: RawData[] } = await res.json();
-  return data.map((item: RawData) => ({ ...item, tags: item.tags.split(',') }));
-};
 
-const FileItem = ({ file, onSelect }: { file: DriveFile, onSelect: (data: Data[]) => void }) => {
+const FileItem = ({ isNew, file, onSelect }: { isNew: boolean, file: DriveFile, onSelect: (data: Data[]) => void }) => {
   
   const [ isFetching, setIsFetching ] = useState(false);
-  const [ isAccessed, setIsAccessed ] = useState<boolean | undefined>(false);
+  const [ isAccessed, setIsAccessed ] = useState<boolean | undefined>(!isNew);
   
   const handleSelect = async () => {
     try {
