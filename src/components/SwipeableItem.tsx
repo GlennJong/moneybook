@@ -127,6 +127,7 @@ const SwipeableItem: React.FC<SwipeableItemProps> = ({ children, onDelete, onCli
           position: 'relative',
           zIndex: 1,
           height: '100%',
+          touchAction: 'pan-y', // Allow browser to handle vertical scrolling, but we handle horizontal
         }}
       >
         {children}

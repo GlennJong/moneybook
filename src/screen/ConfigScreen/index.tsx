@@ -8,18 +8,30 @@ interface ConfigScreenProps {
 
 const ConfigScreen = ({ onSync, isSyncing = false, pendingCount = 0 }: ConfigScreenProps) => {
   const [maxTags, setMaxTags] = useState(10);
+  const [bigPurchaseThreshold, setBigPurchaseThreshold] = useState(1000);
 
   useEffect(() => {
-    const saved = localStorage.getItem('moneybook_max_tags');
-    if (saved) {
-      setMaxTags(Number(saved));
+    const savedTags = localStorage.getItem('moneybook_max_tags');
+    if (savedTags) {
+      setMaxTags(Number(savedTags));
+    }
+    
+    const savedThreshold = localStorage.getItem('moneybook_big_purchase_threshold');
+    if (savedThreshold) {
+      setBigPurchaseThreshold(Number(savedThreshold));
     }
   }, []);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleMaxTagsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = Number(e.target.value);
     setMaxTags(val);
     localStorage.setItem('moneybook_max_tags', String(val));
+  };
+
+  const handleThresholdChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = Number(e.target.value);
+    setBigPurchaseThreshold(val);
+    localStorage.setItem('moneybook_big_purchase_threshold', String(val));
   };
 
   return (
@@ -65,10 +77,27 @@ const ConfigScreen = ({ onSync, isSyncing = false, pendingCount = 0 }: ConfigScr
             min="0"
             style={{ width: '100%', padding: '8px', fontSize: '16px' }}
             value={maxTags}
-            onChange={handleChange}
+            onChange={handleMaxTagsChange}
           />
           <p style={{ fontSize: '0.9em', color: '#666', marginTop: '5px' }}>
             Tags will be sorted by usage frequency. Set 0 to show all tags.
+          </p>
+        </div>
+
+        <div style={{ marginBottom: '15px' }}>
+          <label style={{ display: 'block', marginBottom: '5px' }}>
+            Big Purchase Threshold ($)
+          </label>
+          <input
+            type="number"
+            inputMode="numeric"
+            min="0"
+            style={{ width: '100%', padding: '8px', fontSize: '16px' }}
+            value={bigPurchaseThreshold}
+            onChange={handleThresholdChange}
+          />
+          <p style={{ fontSize: '0.9em', color: '#666', marginTop: '5px' }}>
+            Transactions above this amount will be considered "Big Purchases".
           </p>
         </div>
       </div>

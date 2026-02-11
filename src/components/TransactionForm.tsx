@@ -28,13 +28,14 @@ const TransactionForm = ({ onSubmit, transactions = [], initialData, onCancel, s
   });
   const [isTagsFocused, setIsTagsFocused] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isTagSelectorOpen, setIsTagSelectorOpen] = useState(false);
 
   useEffect(() => {
     if (initialData) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setNewName(initialData.name);
       setNewPrice(String(initialData.price));
-      setTags(initialData.tags || []);
+      setTags(initialData.tags?.filter(t => t.trim() !== '') || []);
       
       const date = new Date(initialData.created_at);
       const offset = date.getTimezoneOffset() * 60000;
@@ -54,33 +55,41 @@ const TransactionForm = ({ onSubmit, transactions = [], initialData, onCancel, s
   const priceRef = useRef<HTMLInputElement>(null);
   const nameRef = useRef<HTMLInputElement>(null);
   const tagsRef = useRef<HTMLInputElement>(null);
+  const tagInputRef = useRef<HTMLInputElement>(null);
 
-  const suggestedTags = useMemo(() => {
+  const allAvailableTags = useMemo(() => {
     const counts: Record<string, number> = {};
     transactions.forEach(t => {
       t.tags.forEach(tag => {
-        counts[tag] = (counts[tag] || 0) + 1;
+        if (tag && tag.trim()) {
+            counts[tag] = (counts[tag] || 0) + 1;
+        }
       });
     });
-    
-    // All unique tags sorted by frequency
-    const allTags = Object.entries(counts)
+    return Object.entries(counts)
       .sort((a, b) => b[1] - a[1])
       .map(([tag]) => tag);
-
+  }, [transactions]);
+  
+  const suggestedTags = useMemo(() => {
     // Filter based on input and exclude already selected
-    return allTags.filter(tag => 
+    return allAvailableTags.filter(tag => 
+      tag.trim() !== '' &&
       !tags.includes(tag) && 
       tag.toLowerCase().includes(tagInput.toLowerCase())
-    ).slice(0, tagInput ? 10 : 5); // Show more if searching
-  }, [transactions, tagInput, tags]);
+    );
+  }, [allAvailableTags, tagInput, tags]);
 
   const addTag = (tag: string) => {
-    if (!tags.includes(tag)) {
-      setTags([...tags, tag]);
+    const trimmedTag = tag.trim();
+    if (trimmedTag && !tags.includes(trimmedTag)) {
+      setTags([...tags, trimmedTag]);
     }
     setTagInput('');
-    tagsRef.current?.focus();
+    // Keep focus on input if selector is open
+    if (isTagSelectorOpen) {
+        tagInputRef.current?.focus();
+    }
   };
 
   const removeTag = (tagToRemove: string) => {
@@ -173,7 +182,7 @@ const TransactionForm = ({ onSubmit, transactions = [], initialData, onCancel, s
           onKeyDown={(e) => {
             if (e.nativeEvent.isComposing || (nameRef.current as HTMLInputElementWithComposing | null)?.isComposing) return;
             if (e.key === 'Enter') {
-              tagsRef.current?.focus();
+              setIsTagSelectorOpen(true);
             }
           }}
         />
@@ -182,114 +191,194 @@ const TransactionForm = ({ onSubmit, transactions = [], initialData, onCancel, s
 
       <div style={{ marginBottom: '20px' }}>
         <label style={{ display: 'block', marginBottom: '5px' }}>Tags</label>
-        <div 
-          style={{ 
-            border: '1px solid #767676', 
-            borderRadius: '2px', 
-            padding: '4px', 
-            display: 'flex', 
-            flexWrap: 'wrap', 
-            gap: '4px', 
-            backgroundColor: 'white',
-            minHeight: '38px', // Match standard input height
-            alignItems: 'center'
-          }}
-          onClick={() => tagsRef.current?.focus()}
-        >
-          {tags.map(tag => (
-            <span 
-              key={tag} 
-              style={{
-                backgroundColor: '#e0e0e0',
-                borderRadius: '16px',
-                padding: '2px 8px',
-                display: 'flex',
-                alignItems: 'center',
-                fontSize: '14px'
-              }}
-            >
-              {tag}
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  removeTag(tag);
-                }}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  marginLeft: '4px',
-                  cursor: 'pointer',
-                  fontSize: '14px',
-                  padding: 0,
-                  color: '#666'
-                }}
-              >
-                ×
-              </button>
-            </span>
-          ))}
-          <input 
-            ref={tagsRef as React.Ref<HTMLInputElementWithComposing>}
-            style={{ 
-              border: 'none', 
-              outline: 'none', 
-              flexGrow: 1, 
-              padding: '4px', 
-              fontSize: '16px',
-              minWidth: '60px'
-            }}
-            placeholder={tags.length === 0 ? "Food, Drink" : ""}
-            value={tagInput} 
-            onChange={e => setTagInput(e.target.value)}
-            onFocus={() => setIsTagsFocused(true)}
-            onBlur={() => setTimeout(() => setIsTagsFocused(false), 200)} 
-            onCompositionStart={() => {
-              (tagsRef.current as HTMLInputElementWithComposing | null)!.isComposing = true;
-            }}
-            onCompositionEnd={() => {
-              (tagsRef.current as HTMLInputElementWithComposing | null)!.isComposing = false;
-            }}
-            onKeyDown={(e) => {
-              if (e.nativeEvent.isComposing || (tagsRef.current as HTMLInputElementWithComposing | null)?.isComposing) {
-                return;
-              }
-
-              if (e.key === 'Enter') {
-                e.preventDefault();
-                if (tagInput.trim()) {
-                  addTag(tagInput.trim());
-                } else {
-                  handleSubmit();
-                }
-              } else if (e.key === 'Backspace' && !tagInput && tags.length > 0) {
-                removeTag(tags[tags.length - 1]);
-              }
-            }}
-          />
-        </div>
-        {isTagsFocused && suggestedTags.length > 0 && (
-          <div style={{ display: 'flex', gap: '8px', marginTop: '8px', flexWrap: 'wrap' }}>
-            {suggestedTags.map(tag => (
-              <button
-                key={tag}
-                onMouseDown={(e) => e.preventDefault()} // Prevent focus loss
-                onClick={() => addTag(tag)}
-                style={{
-                  backgroundColor: '#e9ecef',
-                  border: '1px solid #ced4da',
-                  borderRadius: '16px',
-                  padding: '4px 12px',
-                  fontSize: '14px',
-                  cursor: 'pointer',
-                  color: '#495057'
-                }}
-              >
-                {tag}
-              </button>
+        
+        <div style={{ display: 'flex', flexWrap: 'nowrap', gap: '8px', marginBottom: '10px', overflowX: 'auto', paddingBottom: '5px' }}>
+            {tags.map(tag => (
+                <span 
+                    key={tag} 
+                    style={{
+                        backgroundColor: '#e0e0e0',
+                        borderRadius: '16px',
+                        padding: '4px 12px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        fontSize: '14px',
+                        flexShrink: 0,
+                        whiteSpace: 'nowrap'
+                    }}
+                >
+                    {tag}
+                    <button
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            removeTag(tag);
+                        }}
+                        style={{
+                            background: 'none',
+                            border: 'none',
+                            marginLeft: '6px',
+                            cursor: 'pointer',
+                            fontSize: '16px',
+                            padding: 0,
+                            color: '#666',
+                            lineHeight: 1
+                        }}
+                    >
+                        ×
+                    </button>
+                </span>
             ))}
-          </div>
-        )}
+            <button
+                onClick={() => setIsTagSelectorOpen(true)}
+                style={{
+                    backgroundColor: 'transparent',
+                    border: '1px dashed #999',
+                    borderRadius: '16px',
+                    padding: '4px 12px',
+                    color: '#666',
+                    cursor: 'pointer',
+                    fontSize: '14px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    flexShrink: 0,
+                    whiteSpace: 'nowrap'
+                }}
+            >
+                + Add Tag
+            </button>
+        </div>
       </div>
+      
+      {/* Tag Selector Modal */}
+      {isTagSelectorOpen && (
+        <div style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0,0,0,0.5)',
+            zIndex: 3000,
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'flex-end', // Bottom sheet style could be nice, or center
+        }}>
+            <div style={{
+                backgroundColor: 'white',
+                width: '100%',
+                height: '80vh', // Take up most of screen
+                borderTopLeftRadius: '20px',
+                borderTopRightRadius: '20px',
+                padding: '20px',
+                display: 'flex',
+                flexDirection: 'column',
+                animation: 'slideUp 0.3s ease-out'
+            }}>
+                <style>{`
+                    @keyframes slideUp {
+                        from { transform: translateY(100%); }
+                        to { transform: translateY(0); }
+                    }
+                `}</style>
+                
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                    <h2 style={{ margin: 0 }}>Select Tags</h2>
+                    <button 
+                        onClick={() => setIsTagSelectorOpen(false)}
+                        style={{ background: 'none', border: 'none', fontSize: '16px', color: '#007bff', fontWeight: 'bold', cursor: 'pointer' }}
+                    >
+                        Done
+                    </button>
+                </div>
+
+                <div style={{ marginBottom: '20px' }}>
+                    <input 
+                        ref={tagInputRef}
+                        autoFocus
+                        style={{ 
+                            width: '100%', 
+                            padding: '12px', 
+                            fontSize: '16px',
+                            border: '1px solid #ccc',
+                            borderRadius: '8px'
+                        }}
+                        placeholder="Search or create tag..."
+                        value={tagInput} 
+                        onChange={e => setTagInput(e.target.value)}
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                                e.preventDefault();
+                                if (tagInput.trim()) {
+                                    addTag(tagInput.trim());
+                                } else {
+                                    // If empty enter, maybe close? Or just do nothing.
+                                    // setIsTagSelectorOpen(false); 
+                                }
+                            }
+                        }}
+                    />
+                </div>
+
+                <div style={{ flex: 1, overflowY: 'auto' }}>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                         {/* Show filtered suggestions */}
+                         {suggestedTags.map(tag => (
+                            <button
+                                key={tag}
+                                onClick={() => addTag(tag)}
+                                style={{
+                                    backgroundColor: 'white',
+                                    border: '1px solid #ced4da',
+                                    borderRadius: '20px',
+                                    padding: '8px 16px',
+                                    fontSize: '14px',
+                                    cursor: 'pointer',
+                                    color: '#495057'
+                                }}
+                            >
+                                + {tag}
+                            </button>
+                        ))}
+                    </div>
+
+                    {tagInput && suggestedTags.length === 0 && (
+                        <div style={{ padding: '10px 0', color: '#666' }}>
+                            Press Enter to create "{tagInput}"
+                        </div>
+                    )}
+
+                    <hr style={{ margin: '20px 0', border: 'none', borderTop: '1px solid #eee' }} />
+                    
+                    <h4 style={{ margin: '0 0 10px 0', color: '#666' }}>Selected</h4>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '20px' }}>
+                        {tags.length > 0 ? tags.map(tag => (
+                            <button 
+                                key={tag} 
+                                onClick={() => removeTag(tag)}
+                                style={{
+                                    backgroundColor: '#007bff',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '20px',
+                                    padding: '8px 16px',
+                                    fontSize: '14px',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '5px'
+                                }}
+                            >
+                                {tag} <span>×</span>
+                            </button>
+                        )) : (
+                            <span style={{ color: '#999' }}>No tags selected</span>
+                        )}
+                    </div>
+                </div>
+            </div>
+        </div>
+      )}
 
       <div style={{ display: 'flex', gap: '10px' }}>
         {onCancel && (

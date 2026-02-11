@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef, useLayoutEffect } from "react";
 import type { Transaction } from "../../types";
 import MonthPicker from "./MonthPicker";
 import SwipeableItem from "../../components/SwipeableItem";
@@ -14,12 +14,42 @@ const ListScreen = ({ transactions, removeTransaction, syncFromCloud, onEdit }: 
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const [isMonthPickerOpen, setIsMonthPickerOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [showBigPurchaseOnly, setShowBigPurchaseOnly] = useState(false);
+  const [showToolbar, setShowToolbar] = useState(true);
+  const lastScrollY = useRef(0);
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.matchMedia("(max-width: 768px)").matches);
     checkMobile();
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  useEffect(() => {
+    const container = document.getElementById('main-scroll-container');
+    if (!container) return;
+
+    // Initialize lastScrollY to current scroll position to prevent initial jump
+    lastScrollY.current = container.scrollTop;
+
+    const handleScroll = () => {
+      const currentScrollY = container.scrollTop;
+      
+      // iOS Style: 
+      // Scrolling DOWN (viewing lower content) -> Header/Footer hides to show more content.
+      // Scrolling UP (viewing higher content) -> Header/Footer shows.
+      // "Slide from bottom to top" gesture = Scrolling DOWN.
+      
+      if (currentScrollY > lastScrollY.current && currentScrollY > 50) {
+        setShowToolbar(false);
+      } else {
+        setShowToolbar(true);
+      }
+      lastScrollY.current = currentScrollY;
+    };
+
+    container.addEventListener('scroll', handleScroll);
+    return () => container.removeEventListener('scroll', handleScroll);
   }, []);
 
   // Derived state
@@ -42,9 +72,15 @@ const ListScreen = ({ transactions, removeTransaction, syncFromCloud, onEdit }: 
     if (selectedTag) {
       data = data.filter(t => t.tags?.includes(selectedTag));
     }
+    
+    if (showBigPurchaseOnly) {
+      const threshold = Number(localStorage.getItem('moneybook_big_purchase_threshold') || 1000);
+      data = data.filter(t => t.price >= threshold);
+    }
+
     // Sort by date asc (Oldest to Newest)
     return [...data].sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
-  }, [selectedTag, transactions]);
+  }, [selectedTag, transactions, showBigPurchaseOnly]);
 
   const totalAmount = useMemo(() => 
     filteredTransactions.reduce((sum, t) => sum + t.price, 0),
@@ -74,14 +110,11 @@ const ListScreen = ({ transactions, removeTransaction, syncFromCloud, onEdit }: 
   }, [syncFromCloud]);
 
   // Scroll to bottom on mount
-  useEffect(() => {
-    // Use timeout to ensure DOM is ready
-    setTimeout(() => {
-      const container = document.getElementById('main-scroll-container');
-      if (container) {
-        container.scrollTop = container.scrollHeight;
-      }
-    }, 0);
+  useLayoutEffect(() => {
+    const container = document.getElementById('main-scroll-container');
+    if (container) {
+      container.scrollTop = container.scrollHeight;
+    }
   }, []); // Only run on mount
 
   const scrollToMonth = (month: string) => {
@@ -102,6 +135,16 @@ const ListScreen = ({ transactions, removeTransaction, syncFromCloud, onEdit }: 
     }
   };
 
+  const scrollToBottom = () => {
+    const container = document.getElementById('main-scroll-container');
+    if (container) {
+      container.scrollTo({
+        top: container.scrollHeight,
+        behavior: "smooth"
+      });
+    }
+  };
+
   return (
     <div style={{ padding: '20px' }}>
       <MonthPicker 
@@ -115,36 +158,127 @@ const ListScreen = ({ transactions, removeTransaction, syncFromCloud, onEdit }: 
         Total: ${totalAmount.toLocaleString()}
       </div>
       
-      <div className="filter-section" style={{ marginBottom: '20px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+      {/* Floating Toolbar */}
+      <div 
+        style={{
+          position: 'fixed',
+          bottom: '70px', // Above bottom nav (assuming ~60px height + spacing)
+          left: '20px',
+          right: '20px',
+          backgroundColor: 'rgba(255, 255, 255, 0.95)',
+          backdropFilter: 'blur(10px)',
+          borderRadius: '16px',
+          padding: '10px 15px',
+          boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '15px',
+          zIndex: 900,
+          transform: showToolbar ? 'translateY(0)' : 'translateY(150%)',
+          transition: 'transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)',
+          border: '1px solid rgba(0,0,0,0.05)'
+        }}
+      >
+        {/* Big Purchase Toggle */}
         <button 
-          onClick={() => setSelectedTag(null)}
-          style={{ 
-            backgroundColor: selectedTag === null ? '#007bff' : '#f0f0f0',
-            color: selectedTag === null ? 'white' : 'black',
+          onClick={() => setShowBigPurchaseOnly(!showBigPurchaseOnly)}
+          style={{
+            background: 'none',
             border: 'none',
-            padding: '5px 10px',
-            borderRadius: '15px',
-            cursor: 'pointer'
+            fontSize: '1.2rem',
+            cursor: 'pointer',
+            padding: '8px',
+            borderRadius: '50%',
+            backgroundColor: showBigPurchaseOnly ? '#ffebee' : 'transparent',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            transition: 'background-color 0.2s',
+            flexShrink: 0
           }}
+          title={`Show Big Purchases Only (>= $${Number(localStorage.getItem('moneybook_big_purchase_threshold') || 1000)})`}
         >
-          All
+          {showBigPurchaseOnly ? '💰' : '💵'}
         </button>
-        {uniqueTags.map(tag => (
+
+        <div style={{ width: '1px', height: '24px', backgroundColor: '#eee', flexShrink: 0 }}></div>
+        
+        {/* Scroll To Bottom */}
+        <button 
+          onClick={scrollToBottom}
+          style={{
+            background: 'none',
+            border: 'none',
+            fontSize: '1.2rem',
+            cursor: 'pointer',
+            padding: '8px',
+            borderRadius: '50%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            transition: 'background-color 0.2s',
+            flexShrink: 0
+          }}
+          title="Scroll to Bottom"
+        >
+          ⬇️
+        </button>
+
+        <div style={{ width: '1px', height: '24px', backgroundColor: '#eee', flexShrink: 0 }}></div>
+
+        {/* Tags Scroll View */}
+        <div style={{ 
+          display: 'flex', 
+          overflowX: 'auto', 
+          gap: '8px', 
+          scrollbarWidth: 'none', 
+          msOverflowStyle: 'none',
+          paddingRight: '10px',
+          alignItems: 'center'
+        }}>
+          <style dangerouslySetInnerHTML={{__html: `
+            ::-webkit-scrollbar { display: none; }
+          `}} />
+          
           <button 
-            key={tag}
-            onClick={() => setSelectedTag(tag)}
+            onClick={() => setSelectedTag(null)}
             style={{ 
-              backgroundColor: selectedTag === tag ? '#007bff' : '#f0f0f0',
-              color: selectedTag === tag ? 'white' : 'black',
-              border: 'none',
-              padding: '5px 10px',
-              borderRadius: '15px',
-              cursor: 'pointer'
+              backgroundColor: selectedTag === null ? '#007bff' : '#f8f9fa',
+              color: selectedTag === null ? 'white' : '#333',
+              border: selectedTag === null ? 'none' : '1px solid #eee',
+              padding: '6px 12px',
+              borderRadius: '20px',
+              cursor: 'pointer',
+              whiteSpace: 'nowrap',
+              fontSize: '0.9rem',
+              fontWeight: 500,
+              flexShrink: 0
             }}
           >
-            {tag}
+            All
           </button>
-        ))}
+          
+          {uniqueTags.map(tag => (
+            <button 
+              key={tag}
+              onClick={() => setSelectedTag(tag)}
+              style={{ 
+                backgroundColor: selectedTag === tag ? '#007bff' : '#f8f9fa',
+                color: selectedTag === tag ? 'white' : '#333',
+                border: selectedTag === tag ? 'none' : '1px solid #eee',
+                padding: '6px 12px',
+                borderRadius: '20px',
+                cursor: 'pointer',
+                whiteSpace: 'nowrap',
+                fontSize: '0.9rem',
+                fontWeight: 500,
+                flexShrink: 0
+              }}
+            >
+              {tag}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="transaction-list">
@@ -194,42 +328,72 @@ const ListScreen = ({ transactions, removeTransaction, syncFromCloud, onEdit }: 
               )}
             </div>
             
-            {data.items.map(tx => (
-              <SwipeableItem
-                key={tx.id}
-                onDelete={() => removeTransaction(tx.id)}
-                onClick={() => onEdit(tx)}
-              >
-                <div 
-                  style={{ 
-                    padding: '10px', 
-                    borderBottom: '1px solid #eee',
-                    display: 'flex', 
-                    justifyContent: 'space-between',
-                    opacity: tx.syncStatus === 'pending' ? 0.7 : 1,
-                    cursor: 'pointer' 
-                  }}
-                >
-                  <div>
-                    <small style={{ color: '#999' }}>
-                      {(() => {
-                        const d = new Date(tx.created_at);
-                        return `${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getDate().toString().padStart(2, '0')} ${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
-                      })()}
-                      {tx.syncStatus === 'pending' && <span style={{ color: 'orange', marginLeft: '5px' }}> (Syncing...)</span>}
-                      {tx.syncStatus === 'error' && <span style={{ color: 'red', marginLeft: '5px' }}> (Failed to modify)</span>}
-                    </small>
-                    <br />
-                    <div>
-                      <strong>{tx.name}</strong> - ${tx.price}
-                      <div>
-                        <small style={{ color: '#666' }}>{tx.tags.join(', ')}</small>
-                      </div>
-                    </div>
+            {(() => {
+              const dayGroups: { dateStr: string, date: Date, items: Transaction[], total: number }[] = [];
+              let currentGroup: typeof dayGroups[0] | null = null;
+
+              data.items.forEach(tx => {
+                  const d = new Date(tx.created_at);
+                  const dateStr = d.toDateString();
+
+                  if (!currentGroup || currentGroup.dateStr !== dateStr) {
+                      currentGroup = { dateStr, date: d, items: [], total: 0 };
+                      dayGroups.push(currentGroup);
+                  }
+                  currentGroup.items.push(tx);
+                  currentGroup.total += tx.price;
+              });
+
+              return dayGroups.map(group => (
+                <div key={group.dateStr} style={{ marginBottom: '10px' }}>
+                  <div style={{ 
+                      padding: '8px 4px', 
+                      backgroundColor: '#f8f9fa', 
+                      fontSize: '0.9em',
+                      color: '#666',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      borderBottom: '1px solid #eee',
+                      fontWeight: 'bold'
+                  }}>
+                      <span>{group.date.toLocaleDateString(undefined, { month: 'numeric', day: 'numeric', weekday: 'short' })}</span>
+                      <span>${group.total.toLocaleString()}</span>
                   </div>
+                  
+                  {group.items.map(tx => (
+                    <SwipeableItem
+                      key={tx.id}
+                      onDelete={() => removeTransaction(tx.id)}
+                      onClick={() => onEdit(tx)}
+                    >
+                      <div 
+                        style={{ 
+                          padding: '12px 10px', 
+                          borderBottom: '1px solid #f0f0f0',
+                          display: 'flex', 
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          opacity: tx.syncStatus === 'pending' ? 0.7 : 1,
+                          cursor: 'pointer' 
+                        }}
+                      >
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                          <div style={{ fontWeight: 'bold', fontSize: '1rem' }}>{tx.name}</div>
+                          <div style={{ fontSize: '0.85rem', color: '#888', display: 'flex', alignItems: 'center' }}>
+                            {tx.tags.join(', ')}
+                            {tx.syncStatus === 'pending' && <span style={{ color: 'orange', marginLeft: '5px' }}>●</span>}
+                            {tx.syncStatus === 'error' && <span style={{ color: 'red', marginLeft: '5px' }}>!</span>}
+                          </div>
+                        </div>
+                        <div style={{ fontWeight: 'bold' }}>
+                           ${tx.price.toLocaleString()}
+                        </div>
+                      </div>
+                    </SwipeableItem>
+                  ))}
                 </div>
-              </SwipeableItem>
-            ))}
+              ));
+            })()}
           </div>
         ))}
 

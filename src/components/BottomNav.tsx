@@ -87,11 +87,11 @@ const BottomNav = ({ currentTab, onTabChange }: BottomNavProps) => {
       </button>
 
       <button 
-        onClick={() => onTabChange('search')}
+        onClick={() => onTabChange('discover')}
         style={{
           background: 'none',
           border: 'none',
-          color: currentTab === 'search' ? '#007bff' : '#999',
+          color: currentTab === 'discover' ? '#007bff' : '#999',
           fontSize: '1em',
           cursor: 'pointer',
           display: 'flex',
@@ -101,7 +101,7 @@ const BottomNav = ({ currentTab, onTabChange }: BottomNavProps) => {
         }}
       >
         <span style={{ fontSize: '1.5em' }}>🔍</span>
-        <span style={{ fontSize: '0.8em' }}>Search</span>
+        <span style={{ fontSize: '0.8em' }}>Discover</span>
       </button>
 
       <button 

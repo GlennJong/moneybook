@@ -1,7 +1,7 @@
 import { useState } from "react";
 import type { Transaction } from "../types";
 import ListScreen from "./ListScreen";
-import SearchScreen from "./SearchScreen";
+import DiscoverScreen from "./DiscoverScreen";
 import CreateScreen from "./CreateScreen";
 import ConfigScreen from "./ConfigScreen";
 import TodayScreen from "./TodayScreen";
@@ -9,7 +9,7 @@ import BottomNav from "../components/BottomNav";
 import { useTransactions } from "../hooks/useTransactions";
 import TransactionForm from '../components/TransactionForm';
 
-export type Tab = 'list' | 'create' | 'search' | 'config' | 'today';
+export type Tab = 'list' | 'create' | 'discover' | 'config' | 'today';
 
 const MainLayout = () => {
   const [currentTab, setCurrentTab] = useState<Tab>('list');
@@ -75,7 +75,7 @@ const MainLayout = () => {
             }} 
           />
         )}
-        {currentTab === 'search' && <SearchScreen />}
+        {currentTab === 'discover' && <DiscoverScreen transactions={transactions} />}
         {currentTab === 'config' && (
           <ConfigScreen 
             onSync={pushPendingChanges}
