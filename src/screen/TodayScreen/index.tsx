@@ -46,11 +46,11 @@ const TodayScreen = ({ transactions, removeTransaction, onEdit }: TodayScreenPro
       <div className="card" style={{ 
         padding: '20px', 
         marginBottom: '20px', 
-        backgroundColor: '#007bff', 
-        color: 'white', 
+        backgroundColor: 'var(--primary)', 
+        color: 'var(--text-inv)', 
         borderRadius: '12px',
-        textAlign: 'center',
-        boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+        textAlign: 'center', 
+        boxShadow: '0 4px 6px var(--shadow-color)'
       }}>
         <div style={{ fontSize: '0.9em', opacity: 0.9 }}>Total</div>
         <div style={{ fontSize: '2.5em', fontWeight: 'bold' }}>
@@ -63,7 +63,7 @@ const TodayScreen = ({ transactions, removeTransaction, onEdit }: TodayScreenPro
 
       <div className="transaction-list">
         {todayTransactions.length === 0 ? (
-          <div style={{ textAlign: 'center', color: '#666', marginTop: '40px' }}>
+          <div style={{ textAlign: 'center', color: 'var(--text-muted)', marginTop: '40px' }}>
             No transactions yet today.
           </div>
         ) : (
@@ -72,27 +72,27 @@ const TodayScreen = ({ transactions, removeTransaction, onEdit }: TodayScreenPro
               key={tx.id} 
               onClick={() => onEdit(tx)}
               style={{ 
-                backgroundColor: tx.price === 0 ? '#fff3cd' : 'white', // Yellow background for planned
+                backgroundColor: tx.price === 0 ? 'var(--warning-bg-subtle)' : 'var(--bg-item)', // Yellow background for planned
                 padding: '15px', 
                 borderRadius: '8px',
-                border: tx.price === 0 ? '1px solid #ffeeba' : '1px solid #eee',
+                border: tx.price === 0 ? '1px solid var(--warning)' : '1px solid var(--border-color)',
                 marginBottom: '10px',
                 display: 'flex', 
                 justifyContent: 'space-between',
                 alignItems: 'center',
                 opacity: tx.syncStatus === 'pending' ? 0.7 : 1,
-                boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+                boxShadow: '0 1px 3px var(--shadow-color)',
                 cursor: 'pointer',
                 position: 'relative' // For badge
               }}>
               <div style={{ flex: 1 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                  <strong style={{ fontSize: '1.1em' }}>{tx.name}</strong>
+                  <strong style={{ fontSize: '1.1em', color: tx.price === 0 ? 'var(--warning-text)' : 'var(--text-main)' }}>{tx.name}</strong>
                   {tx.price === 0 ? (
                       <span style={{ 
                           fontSize: '0.85em', 
-                          color: '#856404', 
-                          backgroundColor: '#ffc107', 
+                          color: '#000', 
+                          backgroundColor: 'var(--warning)', 
                           padding: '2px 8px', 
                           borderRadius: '4px',
                           fontWeight: 'bold'
@@ -100,7 +100,7 @@ const TodayScreen = ({ transactions, removeTransaction, onEdit }: TodayScreenPro
                           Planned Expense
                       </span>
                   ) : (
-                      <span style={{ fontWeight: 'bold', fontSize: '1.1em', color: '#333' }}>${tx.price}</span>
+                      <span style={{ fontWeight: 'bold', fontSize: '1.1em', color: 'var(--text-main)' }}>${tx.price}</span>
                   )}
                 </div>
                 
@@ -108,10 +108,10 @@ const TodayScreen = ({ transactions, removeTransaction, onEdit }: TodayScreenPro
                   {tx.tags.map(tag => (
                     <span key={tag} style={{ 
                       fontSize: '0.75em', 
-                      backgroundColor: '#e9ecef', 
+                      backgroundColor: 'var(--chip-bg)', 
                       padding: '2px 8px', 
                       borderRadius: '10px',
-                      color: '#495057'
+                      color: 'var(--text-secondary)'
                     }}>
                       {tag}
                     </span>
@@ -119,10 +119,10 @@ const TodayScreen = ({ transactions, removeTransaction, onEdit }: TodayScreenPro
                 </div>
 
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '5px' }}>
-                  <small style={{ color: '#999' }}>
+                  <small style={{ color: 'var(--text-muted)' }}>
                     {new Date(tx.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                    {tx.syncStatus === 'pending' && <span style={{ color: 'orange', marginLeft: '5px' }}> (Syncing...)</span>}
-                    {tx.syncStatus === 'error' && <span style={{ color: 'red', marginLeft: '5px' }}> (Failed)</span>}
+                    {tx.syncStatus === 'pending' && <span style={{ color: 'var(--warning)', marginLeft: '5px' }}> (Syncing...)</span>}
+                    {tx.syncStatus === 'error' && <span style={{ color: 'var(--danger)', marginLeft: '5px' }}> (Failed)</span>}
                   </small>
                   
                   <button 
@@ -135,13 +135,15 @@ const TodayScreen = ({ transactions, removeTransaction, onEdit }: TodayScreenPro
                     style={{
                       background: 'none',
                       border: 'none',
-                      color: '#dc3545',
+                      color: 'var(--danger)',
                       cursor: 'pointer',
                       fontSize: '0.9em',
-                      padding: '5px'
+                      padding: '5px',
+                      display: 'flex', 
+                      alignItems: 'center'
                     }}
                   >
-                    Delete
+                    <span className="material-icons" style={{ fontSize: '1.2em' }}>delete</span>
                   </button>
                 </div>
               </div>

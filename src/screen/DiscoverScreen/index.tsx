@@ -118,8 +118,8 @@ const DiscoverScreen = ({ transactions }: DiscoverScreenProps) => {
                     padding: '8px 16px',
                     borderRadius: '20px',
                     border: 'none',
-                    backgroundColor: unit === u ? '#007bff' : '#eee',
-                    color: unit === u ? 'white' : 'black',
+                    backgroundColor: unit === u ? 'var(--primary)' : 'var(--input-bg)',
+                    color: unit === u ? 'var(--text-inv)' : 'var(--text-main)',
                     cursor: 'pointer',
                     whiteSpace: 'nowrap',
                     textTransform: 'capitalize'
@@ -130,12 +130,12 @@ const DiscoverScreen = ({ transactions }: DiscoverScreenProps) => {
         ))}
       </div>
 
-      <div style={{ marginBottom: '25px', backgroundColor: '#f8f9fa', padding: '15px', borderRadius: '10px' }}>
-        <h2 style={{ margin: '0 0 10px 0', fontSize: '1.2em', color: '#666' }}>{reportData.label}</h2>
+      <div style={{ marginBottom: '25px', backgroundColor: 'var(--bg-card)', padding: '15px', borderRadius: '10px',  boxShadow: '0 2px 5px var(--shadow-color)' }}>
+        <h2 style={{ margin: '0 0 10px 0', fontSize: '1.2em', color: 'var(--text-secondary)' }}>{reportData.label}</h2>
         <div style={{ fontSize: '2.5em', fontWeight: 'bold' }}>
             ${reportData.currentTotal.toLocaleString()}
         </div>
-        <div style={{ color: reportData.diff > 0 ? '#dc3545' : '#198754', fontWeight: 'bold' }}>
+        <div style={{ color: reportData.diff > 0 ? 'var(--danger)' : 'var(--success)', fontWeight: 'bold' }}>
             {Math.abs(reportData.diff) > 0 ? (
                 <>
                   {reportData.diff > 0 ? '↑' : '↓'} ${Math.abs(reportData.diff).toLocaleString()} ({Math.abs(reportData.diffPercent).toFixed(1)}%)
@@ -143,7 +143,7 @@ const DiscoverScreen = ({ transactions }: DiscoverScreenProps) => {
             ) : (
                 <span>No change</span>
             )}
-            <span style={{ color: '#999', fontWeight: 'normal', fontSize: '0.8em', marginLeft: '5px' }}>vs prev. {unit}</span>
+            <span style={{ color: 'var(--text-muted)', fontWeight: 'normal', fontSize: '0.8em', marginLeft: '5px' }}>vs prev. {unit}</span>
         </div>
       </div>
 
@@ -160,19 +160,24 @@ const DiscoverScreen = ({ transactions }: DiscoverScreenProps) => {
                         outerRadius={80}
                         fill="#8884d8"
                         dataKey="value"
+                        stroke="var(--bg-card)" // Add stroke to separate segments
                         label={({ name, percent }) => `${name} ${((percent ?? 0) * 100).toFixed(0)}%`}
                     >
                         {reportData.pieData.map((_entry, index) => (
                             <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                         ))}
                     </Pie>
-                    <Tooltip formatter={(value: number | undefined) => value !== undefined ? `$${value.toLocaleString()}` : '$0'} />
+                    <Tooltip 
+                        contentStyle={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '8px' }}
+                        itemStyle={{ color: 'var(--text-main)' }}
+                        formatter={(value: number | undefined) => value !== undefined ? `$${value.toLocaleString()}` : '$0'} 
+                    />
                     <Legend />
                 </PieChart>
             </ResponsiveContainer>
           </div>
       ) : (
-          <div style={{ padding: '20px', textAlign: 'center', color: '#999' }}>
+          <div style={{ padding: '20px', textAlign: 'center', color: 'var(--text-muted)' }}>
               No data for this period
           </div>
       )}
@@ -187,24 +192,24 @@ const DiscoverScreen = ({ transactions }: DiscoverScreenProps) => {
                         justifyContent: 'space-between', 
                         alignItems: 'center',
                         padding: '10px',
-                        backgroundColor: 'white',
+                        backgroundColor: 'var(--bg-item)',
                         borderRadius: '8px',
-                        boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+                        boxShadow: '0 1px 3px var(--shadow-color)'
                     }}>
                         <div>
                             <div style={{ fontWeight: 'bold' }}>{t.name}</div>
-                            <div style={{ fontSize: '0.8em', color: '#666' }}>
+                            <div style={{ fontSize: '0.8em', color: 'var(--text-muted)' }}>
                                 {new Date(t.created_at).toLocaleDateString()} • {t.tags?.filter(tag => tag && tag.trim() !== '').join(', ')}
                             </div>
                         </div>
-                        <div style={{ fontWeight: 'bold', color: '#d63384' }}>
+                        <div style={{ fontWeight: 'bold', color: 'var(--danger)' }}>
                             ${t.price.toLocaleString()}
                         </div>
                     </div>
                 ))}
             </div>
         ) : (
-            <div style={{ textAlign: 'center', color: '#999' }}>No big purchases found</div>
+            <div style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No big purchases found</div>
         )}
       </div>
     </div>

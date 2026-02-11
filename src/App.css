@@ -37,7 +37,7 @@
 }
 
 .read-the-docs {
-  color: #888;
+  color: var(--text-muted);
 }
 
 .file-grid {
@@ -48,11 +48,11 @@
 }
 
 .file-card {
-  border: 1px solid #e0e0e0;
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   padding: 1.5rem;
-  background: #fff;
-  color: #333;
+  background: var(--bg-card);
+  color: var(--text-main);
   transition: transform 0.2s, box-shadow 0.2s;
   display: flex;
   flex-direction: column;
@@ -62,13 +62,13 @@
 
 .file-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 12px var(--shadow-color);
 }
 
 .file-card.selected {
-  border-color: #646cff;
-  background-color: #f8f9ff;
-  box-shadow: 0 0 0 2px #646cff40;
+  border-color: var(--primary);
+  background-color: var(--primary-bg-subtle);
+  box-shadow: 0 0 0 2px var(--shadow-color);
 }
 
 .file-card h3 {
@@ -79,7 +79,7 @@
 
 .file-card p {
   margin: 0 0 1rem 0;
-  color: #666;
+  color: var(--text-secondary);
   font-size: 0.9rem;
 }
 
@@ -96,11 +96,11 @@
 }
 
 .success-banner {
-  background-color: #d4edda;
-  color: #155724;
+  background-color: var(--bg-item);
+  color: var(--success);
   padding: 1rem;
   border-radius: 4px;
   margin-bottom: 1rem;
-  border: 1px solid #c3e6cb;
+  border: 1px solid var(--success);
 }
 

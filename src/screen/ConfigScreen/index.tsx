@@ -38,14 +38,14 @@ const ConfigScreen = ({ onSync, isSyncing = false, pendingCount = 0 }: ConfigScr
     <div style={{ padding: '20px' }}>
       <h1>Configuration</h1>
 
-      <div className="card" style={{ padding: '20px', border: '1px solid #ccc', borderRadius: '8px', marginBottom: '20px' }}>
+      <div className="card" style={{ padding: '20px', border: '1px solid var(--border-color)', borderRadius: '8px', marginBottom: '20px', backgroundColor: 'var(--bg-card)' }}>
         <h3 style={{ marginTop: 0 }}>Sync Status</h3>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div>
-            <div style={{ fontWeight: 'bold', color: pendingCount > 0 ? '#d63384' : '#198754' }}>
+            <div style={{ fontWeight: 'bold', color: pendingCount > 0 ? 'var(--danger)' : 'var(--success)' }}>
               {pendingCount > 0 ? `${pendingCount} changes pending` : 'All changes synced'}
             </div>
-            {isSyncing && <div style={{ fontSize: '0.9em', color: '#0d6efd' }}>Syncing in progress...</div>}
+            {isSyncing && <div style={{ fontSize: '0.9em', color: 'var(--primary)' }}>Syncing in progress...</div>}
           </div>
           {onSync && (
             <button 
@@ -53,8 +53,8 @@ const ConfigScreen = ({ onSync, isSyncing = false, pendingCount = 0 }: ConfigScr
               disabled={isSyncing || pendingCount === 0}
               style={{
                 padding: '8px 16px',
-                backgroundColor: isSyncing || pendingCount === 0 ? '#e9ecef' : '#0d6efd',
-                color: isSyncing || pendingCount === 0 ? '#6c757d' : 'white',
+                backgroundColor: isSyncing || pendingCount === 0 ? 'var(--input-bg)' : 'var(--primary)',
+                color: isSyncing || pendingCount === 0 ? 'var(--text-muted)' : 'var(--text-inv)',
                 border: 'none',
                 borderRadius: '6px',
                 cursor: isSyncing || pendingCount === 0 ? 'default' : 'pointer'
@@ -66,7 +66,7 @@ const ConfigScreen = ({ onSync, isSyncing = false, pendingCount = 0 }: ConfigScr
         </div>
       </div>
 
-      <div className="card" style={{ padding: '20px', border: '1px solid #ccc', borderRadius: '8px' }}>
+      <div className="card" style={{ padding: '20px', border: '1px solid var(--border-color)', borderRadius: '8px', backgroundColor: 'var(--bg-card)' }}>
         <div style={{ marginBottom: '15px' }}>
           <label style={{ display: 'block', marginBottom: '5px' }}>
             Max Tags to Show in Filter List
@@ -75,11 +75,11 @@ const ConfigScreen = ({ onSync, isSyncing = false, pendingCount = 0 }: ConfigScr
             type="number"
             inputMode="numeric"
             min="0"
-            style={{ width: '100%', padding: '8px', fontSize: '16px' }}
+            style={{ width: '100%', padding: '8px', fontSize: '16px', backgroundColor: 'var(--input-bg)', color: 'var(--text-main)', border: '1px solid var(--border-color)', borderRadius: '4px' }}
             value={maxTags}
             onChange={handleMaxTagsChange}
           />
-          <p style={{ fontSize: '0.9em', color: '#666', marginTop: '5px' }}>
+          <p style={{ fontSize: '0.9em', color: 'var(--text-secondary)', marginTop: '5px' }}>
             Tags will be sorted by usage frequency. Set 0 to show all tags.
           </p>
         </div>
@@ -92,11 +92,11 @@ const ConfigScreen = ({ onSync, isSyncing = false, pendingCount = 0 }: ConfigScr
             type="number"
             inputMode="numeric"
             min="0"
-            style={{ width: '100%', padding: '8px', fontSize: '16px' }}
+            style={{ width: '100%', padding: '8px', fontSize: '16px', backgroundColor: 'var(--input-bg)', color: 'var(--text-main)', border: '1px solid var(--border-color)', borderRadius: '4px' }}
             value={bigPurchaseThreshold}
             onChange={handleThresholdChange}
           />
-          <p style={{ fontSize: '0.9em', color: '#666', marginTop: '5px' }}>
+          <p style={{ fontSize: '0.9em', color: 'var(--text-secondary)', marginTop: '5px' }}>
             Transactions above this amount will be considered "Big Purchases".
           </p>
         </div>

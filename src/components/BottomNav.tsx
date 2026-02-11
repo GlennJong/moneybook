@@ -12,39 +12,22 @@ const BottomNav = ({ currentTab, onTabChange }: BottomNavProps) => {
       bottom: 0,
       left: 0,
       right: 0,
-      backgroundColor: 'white',
-      borderTop: '1px solid #eee',
+      backgroundColor: 'var(--bg-card)',
+      borderTop: '1px solid var(--border-color)',
       display: 'flex',
       justifyContent: 'space-around',
       alignItems: 'center',
-      padding: '10px 0',
+      paddingTop: '12px',
+      paddingBottom: 'calc(25px + env(safe-area-inset-bottom))',
       zIndex: 1000,
-      boxShadow: '0 -2px 5px rgba(0,0,0,0.05)'
+      boxShadow: '0 -2px 5px var(--shadow-color)'
     }}>
-      <button 
-        onClick={() => onTabChange('list')}
-        style={{
-          background: 'none',
-          border: 'none',
-          color: currentTab === 'list' ? '#007bff' : '#999',
-          fontSize: '1em',
-          cursor: 'pointer',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          flex: 1
-        }}
-      >
-        <span style={{ fontSize: '1.5em' }}>🏠</span>
-        <span style={{ fontSize: '0.8em' }}>Home</span>
-      </button>
-
       <button 
         onClick={() => onTabChange('today')}
         style={{
           background: 'none',
           border: 'none',
-          color: currentTab === 'today' ? '#007bff' : '#999',
+          color: currentTab === 'today' ? 'var(--primary)' : 'var(--text-muted)',
           fontSize: '1em',
           cursor: 'pointer',
           display: 'flex',
@@ -53,8 +36,24 @@ const BottomNav = ({ currentTab, onTabChange }: BottomNavProps) => {
           flex: 1
         }}
       >
-        <span style={{ fontSize: '1.5em' }}>📅</span>
-        <span style={{ fontSize: '0.8em' }}>Today</span>
+        <span className="material-icons" style={{ fontSize: '1.5em' }}>calendar_today</span>
+      </button>
+
+      <button 
+        onClick={() => onTabChange('list')}
+        style={{
+          background: 'none',
+          border: 'none',
+          color: currentTab === 'list' ? 'var(--primary)' : 'var(--text-muted)',
+          fontSize: '1em',
+          cursor: 'pointer',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          flex: 1
+        }}
+      >
+        <span className="material-icons" style={{ fontSize: '1.5em' }}>list</span>
       </button>
 
       <button 
@@ -74,15 +73,15 @@ const BottomNav = ({ currentTab, onTabChange }: BottomNavProps) => {
           width: '60px',
           height: '60px',
           borderRadius: '50%',
-          backgroundColor: '#007bff',
+          backgroundColor: 'var(--primary)',
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
-          color: 'white',
+          color: 'var(--text-inv)',
           fontSize: '2em',
-          boxShadow: '0 4px 10px rgba(0,123,255,0.3)'
+          boxShadow: '0 4px 10px var(--shadow-color)'
         }}>
-          +
+          <span className="material-icons" style={{ fontSize: '1em' }}>add</span>
         </div>
       </button>
 
@@ -91,7 +90,7 @@ const BottomNav = ({ currentTab, onTabChange }: BottomNavProps) => {
         style={{
           background: 'none',
           border: 'none',
-          color: currentTab === 'discover' ? '#007bff' : '#999',
+          color: currentTab === 'discover' ? 'var(--primary)' : 'var(--text-muted)',
           fontSize: '1em',
           cursor: 'pointer',
           display: 'flex',
@@ -100,8 +99,7 @@ const BottomNav = ({ currentTab, onTabChange }: BottomNavProps) => {
           flex: 1
         }}
       >
-        <span style={{ fontSize: '1.5em' }}>🔍</span>
-        <span style={{ fontSize: '0.8em' }}>Discover</span>
+        <span className="material-icons" style={{ fontSize: '1.5em' }}>pie_chart</span>
       </button>
 
       <button 
@@ -109,7 +107,7 @@ const BottomNav = ({ currentTab, onTabChange }: BottomNavProps) => {
         style={{
           background: 'none',
           border: 'none',
-          color: currentTab === 'config' ? '#007bff' : '#999',
+          color: currentTab === 'config' ? 'var(--primary)' : 'var(--text-muted)',
           fontSize: '1em',
           cursor: 'pointer',
           display: 'flex',
@@ -118,8 +116,7 @@ const BottomNav = ({ currentTab, onTabChange }: BottomNavProps) => {
           flex: 1
         }}
       >
-        <span style={{ fontSize: '1.5em' }}>⚙️</span>
-        <span style={{ fontSize: '0.8em' }}>Config</span>
+        <span className="material-icons" style={{ fontSize: '1.5em' }}>settings</span>
       </button>
     </div>
   );

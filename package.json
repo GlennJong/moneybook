@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@glennjong/vibe-sheets": "^0.3.6",
+    "material-icons": "^1.13.14",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-is": "^19.2.4",

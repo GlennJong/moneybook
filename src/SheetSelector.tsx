@@ -28,10 +28,30 @@ const CreateSheetBox = ({ createSheet, fetchFiles, onCreate }: CreateSheetBoxPro
   
   return (
     <div>
-      <input type="text" value={sheetName} onChange={(e) => setSheetName(e.target.value)} />
+      <input 
+        type="text" 
+        value={sheetName} 
+        onChange={(e) => setSheetName(e.target.value)} 
+        style={{
+          padding: '8px',
+          borderRadius: '4px',
+          border: '1px solid var(--border-color)',
+          backgroundColor: 'var(--input-bg)',
+          color: 'var(--text-main)',
+          marginBottom: '10px'
+        }}
+      />
       <br />
       <button
         onClick={handleFetchCreationSheet}
+        style={{
+          padding: '8px 16px',
+          borderRadius: '4px',
+          border: 'none',
+          backgroundColor: 'var(--primary)',
+          color: 'var(--text-inv)',
+          cursor: 'pointer'
+        }}
       >
         Create Sheet
       </button>
@@ -63,7 +83,7 @@ const SheetSelector = ({ token, onSelect }: { token: string, onSelect: (endpoint
   
   if (isInitialLoad || (loading && files.length === 0)) {
     return (
-      <div className="card">
+      <div className="card" style={{ backgroundColor: 'var(--bg-card)', color: 'var(--text-main)', border: '1px solid var(--border-color)' }}>
         <h3>Syncing your Moneybooks...</h3>
         <p>Please wait while we fetch your data.</p>
       </div>
@@ -72,11 +92,11 @@ const SheetSelector = ({ token, onSelect }: { token: string, onSelect: (endpoint
   // View: Create New (Enable if no files OR if we just created one successfully)
   if (files.length === 0) {
     return (
-      <div className="card">
+      <div className="card" style={{ backgroundColor: 'var(--bg-card)', color: 'var(--text-main)', border: '1px solid var(--border-color)' }}>
         <h2>Welcome to MoneyBook</h2>
-        <div style={{ padding: '1.5rem', background: '#f8f9fa', borderRadius: '8px', border: '1px solid #dee2e6' }}>
+        <div style={{ padding: '1.5rem', background: 'var(--bg-item)', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
           <h3>No Moneybooks Found</h3>
-          <p style={{ marginBottom: '1rem', color: '#666' }}>
+          <p style={{ marginBottom: '1rem', color: 'var(--text-secondary)' }}>
             It looks like you don't have a MoneyBook backend yet.
           </p>
           <CreateSheetBox
@@ -84,7 +104,20 @@ const SheetSelector = ({ token, onSelect }: { token: string, onSelect: (endpoint
             fetchFiles={fetchFiles}
             onCreate={(sheetName: string) => setNewCreationSheetName([...newCreationSheetName, sheetName])}
           />
-          <button className="secondary" onClick={() => fetchFiles('moneybook-')} disabled={loading}>
+          <button 
+            className="secondary" 
+            onClick={() => fetchFiles('moneybook-')} 
+            disabled={loading}
+            style={{
+               marginTop: '10px',
+               padding: '8px 16px',
+               background: 'transparent',
+               border: '1px solid var(--text-secondary)',
+               color: 'var(--text-secondary)',
+               borderRadius: '4px',
+               cursor: 'pointer'
+            }}
+          >
             Check Again
           </button>
         </div>
@@ -94,7 +127,7 @@ const SheetSelector = ({ token, onSelect }: { token: string, onSelect: (endpoint
 
   // View: List Files
   return (
-    <div className="card">
+    <div className="card" style={{ backgroundColor: 'var(--bg-card)', color: 'var(--text-main)', border: '1px solid var(--border-color)' }}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <h2>Select MoneyBook</h2>

@@ -90,7 +90,7 @@ const SwipeableItem: React.FC<SwipeableItemProps> = ({ children, onDelete, onCli
           bottom: 0,
           right: 0,
           width: '100%', // Cover full width but only right side is visible when swiped
-          backgroundColor: '#ff3b30', // iOS Red
+          backgroundColor: 'var(--danger)',
           display: 'flex',
           justifyContent: 'flex-end',
           alignItems: 'center',
@@ -104,13 +104,15 @@ const SwipeableItem: React.FC<SwipeableItemProps> = ({ children, onDelete, onCli
             height: '100%',
             border: 'none',
             background: 'transparent',
-            color: 'white',
+            color: 'var(--text-inv)',
             fontWeight: 'bold',
-            fontSize: '15px',
             cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
           }}
         >
-          Delete
+          <span className="material-icons">delete</span>
         </button>
       </div>
 
@@ -123,7 +125,7 @@ const SwipeableItem: React.FC<SwipeableItemProps> = ({ children, onDelete, onCli
         style={{
           transform: `translateX(${offset}px)`,
           transition: isSwiping ? 'none' : 'transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)',
-          backgroundColor: 'white', // Important to cover the background
+          backgroundColor: 'var(--bg-item)', // Important to cover the background
           position: 'relative',
           zIndex: 1,
           height: '100%',

@@ -16,7 +16,7 @@ const MonthPicker = ({ isOpen, onClose, months, onSelect }: MonthPickerProps) =>
         left: 0,
         right: 0,
         bottom: 0,
-        backgroundColor: 'rgba(0,0,0,0.5)',
+        backgroundColor: 'var(--modal-overlay)',
         zIndex: 1000,
         display: 'flex',
         justifyContent: 'center',
@@ -26,14 +26,14 @@ const MonthPicker = ({ isOpen, onClose, months, onSelect }: MonthPickerProps) =>
     >
       <div 
         style={{
-          backgroundColor: 'white',
+          backgroundColor: 'var(--bg-card)',
           borderRadius: '8px',
           padding: '20px',
           width: '80%',
           maxWidth: '300px',
           maxHeight: '70vh',
           overflowY: 'auto',
-          boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+          boxShadow: '0 4px 6px var(--shadow-color)'
         }}
         onClick={e => e.stopPropagation()}
       >
@@ -45,9 +45,10 @@ const MonthPicker = ({ isOpen, onClose, months, onSelect }: MonthPickerProps) =>
               onClick={() => onSelect(month)}
               style={{
                 padding: '10px',
-                border: '1px solid #ddd',
+                border: '1px solid var(--border-color)',
                 borderRadius: '4px',
-                backgroundColor: '#f8f9fa',
+                backgroundColor: 'var(--bg-item)',
+                color: 'var(--text-main)',
                 cursor: 'pointer',
                 fontSize: '1em'
               }}
@@ -56,7 +57,7 @@ const MonthPicker = ({ isOpen, onClose, months, onSelect }: MonthPickerProps) =>
             </button>
           ))}
           {months.length === 0 && (
-            <p style={{ textAlign: 'center', color: '#666' }}>No records found</p>
+            <p style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No records found</p>
           )}
         </div>
         <button 
@@ -67,7 +68,7 @@ const MonthPicker = ({ isOpen, onClose, months, onSelect }: MonthPickerProps) =>
             padding: '10px',
             backgroundColor: 'transparent',
             border: 'none',
-            color: '#666',
+            color: 'var(--text-secondary)',
             cursor: 'pointer'
           }}
         >

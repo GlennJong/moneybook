@@ -25,7 +25,7 @@ function App() {
   // Handle getting GAS permission if it's not enabled
   if (!accessToken) {
     return (
-      <div className="card">
+      <div className="card" style={{ backgroundColor: 'var(--bg-card)', color: 'var(--text-main)', border: '1px solid var(--border-color)', borderRadius: '8px' }}>
         <h1>Welcome to MoneyBook</h1>
         <button onClick={login}>Login with Google</button>
       </div>
@@ -33,7 +33,7 @@ function App() {
   }
   else if (accessToken && !isAppsScriptEnabled) {
     return (
-      <div className="card">
+      <div className="card" style={{ backgroundColor: 'var(--bg-card)', color: 'var(--text-main)', border: '1px solid var(--border-color)', borderRadius: '8px' }}>
         <h1>Hi! New User</h1>
         { isAppsScriptEnabled === undefined ? 
           <p>Checking your Apps Script permission...</p>

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useLayoutEffect, useRef } from "react";
 import type { Transaction } from "../types";
 import ListScreen from "./ListScreen";
 import DiscoverScreen from "./DiscoverScreen";
@@ -12,7 +12,15 @@ import TransactionForm from '../components/TransactionForm';
 export type Tab = 'list' | 'create' | 'discover' | 'config' | 'today';
 
 const MainLayout = () => {
-  const [currentTab, setCurrentTab] = useState<Tab>('list');
+  const [currentTab, setCurrentTab] = useState<Tab>('today');
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTop = 0;
+    }
+  }, [currentTab]);
+
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   
   const scriptUrl = localStorage.getItem('vibe_script_url');
@@ -50,7 +58,11 @@ const MainLayout = () => {
       flexDirection: 'column',
       overflow: 'hidden' // Prevent outer scroll
     }}>
-      <div id="main-scroll-container" style={{ flex: 1, overflowY: 'auto', paddingBottom: '70px' }}>
+      <div 
+        ref={scrollContainerRef}
+        id="main-scroll-container" 
+        style={{ flex: 1, overflowY: 'auto', paddingBottom: 'calc(80px + env(safe-area-inset-bottom))' }}
+      >
         {currentTab === 'list' && (
           <ListScreen 
             transactions={transactions}
@@ -93,7 +105,7 @@ const MainLayout = () => {
           left: 0,
           right: 0,
           bottom: 0,
-          backgroundColor: '#f5f5f5',
+          backgroundColor: 'var(--bg-main)',
           zIndex: 2000,
           overflowY: 'auto',
           padding: '20px'
@@ -120,15 +132,15 @@ const MainLayout = () => {
       {(isSyncing || pendingTaskCount > 0) && (
         <div style={{
           position: 'fixed',
-          bottom: '70px',
+          bottom: 'calc(80px + env(safe-area-inset-bottom))',
           right: '20px',
-          backgroundColor: isSyncing ? '#0d6efd' : '#ffc107',
-          color: isSyncing ? 'white' : 'black',
+          backgroundColor: isSyncing ? 'var(--primary)' : 'var(--warning)',
+          color: isSyncing ? 'var(--text-inv)' : 'var(--text-main)',
           padding: '8px 12px',
           borderRadius: '20px',
           fontSize: '0.8em',
           fontWeight: 'bold',
-          boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
+          boxShadow: '0 2px 5px var(--shadow-color)',
           zIndex: 1000,
           display: 'flex',
           alignItems: 'center',
