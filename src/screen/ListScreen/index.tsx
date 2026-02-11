@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import type { Transaction } from "../../types";
 import MonthPicker from "./MonthPicker";
+import SwipeableItem from "../../components/SwipeableItem";
 
 interface ListScreenProps {
   transactions: Transaction[];
@@ -194,35 +195,40 @@ const ListScreen = ({ transactions, removeTransaction, syncFromCloud, onEdit }: 
             </div>
             
             {data.items.map(tx => (
-              <div 
-                key={tx.id} 
+              <SwipeableItem
+                key={tx.id}
+                onDelete={() => removeTransaction(tx.id)}
                 onClick={() => onEdit(tx)}
-                style={{ 
-                  padding: '10px', 
-                  borderBottom: '1px solid #eee',
-                  display: 'flex', 
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  opacity: tx.syncStatus === 'pending' ? 0.7 : 1,
-                  cursor: 'pointer' 
-                }}
               >
-                <div>
-                  <strong>{tx.name}</strong> - ${tx.price}
+                <div 
+                  style={{ 
+                    padding: '10px', 
+                    borderBottom: '1px solid #eee',
+                    display: 'flex', 
+                    justifyContent: 'space-between',
+                    opacity: tx.syncStatus === 'pending' ? 0.7 : 1,
+                    cursor: 'pointer' 
+                  }}
+                >
                   <div>
-                    <small style={{ color: '#666' }}>{tx.tags.join(', ')}</small>
+                    <small style={{ color: '#999' }}>
+                      {(() => {
+                        const d = new Date(tx.created_at);
+                        return `${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getDate().toString().padStart(2, '0')} ${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
+                      })()}
+                      {tx.syncStatus === 'pending' && <span style={{ color: 'orange', marginLeft: '5px' }}> (Syncing...)</span>}
+                      {tx.syncStatus === 'error' && <span style={{ color: 'red', marginLeft: '5px' }}> (Failed to modify)</span>}
+                    </small>
+                    <br />
+                    <div>
+                      <strong>{tx.name}</strong> - ${tx.price}
+                      <div>
+                        <small style={{ color: '#666' }}>{tx.tags.join(', ')}</small>
+                      </div>
+                    </div>
                   </div>
-                  <small style={{ color: '#999' }}>
-                    {new Date(tx.created_at).toLocaleString()}
-                    {tx.syncStatus === 'pending' && <span style={{ color: 'orange', marginLeft: '5px' }}> (Syncing...)</span>}
-                    {tx.syncStatus === 'error' && <span style={{ color: 'red', marginLeft: '5px' }}> (Failed to modify)</span>}
-                  </small>
                 </div>
-                <button onClick={(e) => {
-                  e.stopPropagation();
-                  removeTransaction(tx.id);
-                }}>Delete</button>
-              </div>
+              </SwipeableItem>
             ))}
           </div>
         ))}

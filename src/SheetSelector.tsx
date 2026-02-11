@@ -107,15 +107,14 @@ const SheetSelector = ({ token, onSelect }: { token: string, onSelect: (endpoint
         </div>
 
         {/* List Section */}
-        <div style={{ textAlign: 'left' }}>
+        <div>
           <div className="file-grid">
             {files.map((file) => 
               <FileItem
                 isNew={newCreationSheetName.some((sheetName) => file.name.includes(sheetName))}
                 key={file.id}
                 file={file}
-                onSelect={(data) => {
-                  console.log(data);
+                onSelect={() => {
                   if (file.scriptUrl) {
                     handleStoreEndpoint(file.scriptUrl);
                   }
