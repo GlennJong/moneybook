@@ -59,6 +59,10 @@
   }
 }
 
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
 a {
   font-weight: 500;
   color: var(--primary);
@@ -70,8 +74,6 @@ a:hover {
 
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
   min-width: 320px;
   min-height: 100vh;
   background-color: var(--bg-main);

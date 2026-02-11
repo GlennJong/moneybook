@@ -11,50 +11,84 @@ type CreateSheetBoxProps = {
 
 const CreateSheetBox = ({ createSheet, fetchFiles, onCreate }: CreateSheetBoxProps) => {
   const [sheetName, setSheetName] = useState<string>('');
+  const [isCreating, setIsCreating] = useState(false);
   
   const handleFetchCreationSheet = async () => {
-    await createSheet({
-      sheetName: sheetName,
-      prefix: 'moneybook-',
-      columns: [
-        { name: 'name', type: 'string' },
-        { name: 'price', type: 'number' },
-        { name: 'tags', type: 'string' },
-      ]
-    })
-    fetchFiles('moneybook-');
-    onCreate(sheetName);
+    if (!sheetName.trim()) return;
+    setIsCreating(true);
+    try {
+      await createSheet({
+        sheetName: sheetName,
+        prefix: 'moneybook-',
+        columns: [
+          { name: 'name', type: 'string' },
+          { name: 'price', type: 'number' },
+          { name: 'tags', type: 'string' },
+        ]
+      })
+      await fetchFiles('moneybook-');
+      onCreate(sheetName);
+      setSheetName('');
+    } catch (error) {
+      console.error(error);
+      alert('Failed to create sheet');
+    } finally {
+      setIsCreating(false);
+    }
   }
   
   return (
-    <div>
-      <input 
-        type="text" 
-        value={sheetName} 
-        onChange={(e) => setSheetName(e.target.value)} 
-        style={{
-          padding: '8px',
-          borderRadius: '4px',
-          border: '1px solid var(--border-color)',
-          backgroundColor: 'var(--input-bg)',
-          color: 'var(--text-main)',
-          marginBottom: '10px'
-        }}
-      />
-      <br />
-      <button
-        onClick={handleFetchCreationSheet}
-        style={{
-          padding: '8px 16px',
-          borderRadius: '4px',
-          border: 'none',
-          backgroundColor: 'var(--primary)',
-          color: 'var(--text-inv)',
-          cursor: 'pointer'
-        }}
-      >
-        Create Sheet
-      </button>
+    <div style={{ width: '100%' }}>
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '8px',
+        width: '100%'
+      }}>
+        <input 
+          type="text" 
+          value={sheetName} 
+          onChange={(e) => setSheetName(e.target.value)}
+          placeholder="New Sheet Name" 
+          disabled={isCreating}
+          style={{
+            flex: 1,
+            padding: '0 12px',
+            height: '40px',
+            borderRadius: '4px',
+            border: '1px solid var(--border-color)',
+            backgroundColor: isCreating ? 'var(--bg-main)' : 'var(--input-bg)',
+            color: 'var(--text-main)',
+            boxSizing: 'border-box'
+          }}
+        />
+        <button
+          onClick={handleFetchCreationSheet}
+          disabled={!sheetName.trim() || isCreating}
+          style={{
+            height: '40px',
+            padding: '0 20px',
+            borderRadius: '4px',
+            border: 'none',
+            backgroundColor: (!sheetName.trim() || isCreating) ? 'var(--input-bg)' : 'var(--primary)',
+            color: (!sheetName.trim() || isCreating) ? 'var(--text-muted)' : 'var(--text-inv)',
+            cursor: (!sheetName.trim() || isCreating) ? 'not-allowed' : 'pointer',
+            whiteSpace: 'nowrap',
+            display: 'flex',
+            alignItems: 'center',
+            fontWeight: '500'
+          }}
+        >
+          Create
+        </button>
+      </div>
+      {isCreating && (
+        <div style={{ marginTop: '12px', color: 'var(--text-secondary)', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center' }}>
+          <span className="spinner" style={{ width: '16px', height: '16px', border: '2px solid var(--primary)', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></span>
+          Creating "{sheetName}"... please wait.
+          <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
+        </div>
+      )}
     </div>
   )
 }
@@ -127,39 +161,73 @@ const SheetSelector = ({ token, onSelect }: { token: string, onSelect: (endpoint
 
   // View: List Files
   return (
-    <div className="card" style={{ backgroundColor: 'var(--bg-card)', color: 'var(--text-main)', border: '1px solid var(--border-color)' }}>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h2>Select MoneyBook</h2>
-          <br />
-          <CreateSheetBox
-            createSheet={createSheet}
-            fetchFiles={fetchFiles}
-            onCreate={(sheetName: string) => setNewCreationSheetName([...newCreationSheetName, sheetName])}
-          />
-        </div>
+    <div style={{ maxWidth: '600px', margin: '0 auto', padding: '0 1rem' }}>
+      <h2 style={{ textAlign: 'center', marginBottom: '2rem', color: 'var(--text-main)' }}>Select MoneyBook</h2>
+      
+      {/* Creation Section */}
+      <div style={{ 
+        marginBottom: '2rem', 
+        padding: '1.5rem', 
+        backgroundColor: 'var(--bg-card)', 
+        borderRadius: '12px',
+        border: '1px solid var(--border-color)',
+        boxShadow: '0 2px 8px var(--shadow-color)'
+      }}>
+        <h3 style={{ marginTop: 0, marginBottom: '1rem', fontSize: '1.1rem', color: 'var(--text-main)', fontWeight: '600', textAlign: 'center' }}>Create New Book</h3>
+        <CreateSheetBox
+          createSheet={createSheet}
+          fetchFiles={fetchFiles}
+          onCreate={(sheetName: string) => setNewCreationSheetName([...newCreationSheetName, sheetName])}
+        />
+      </div>
 
-        {/* List Section */}
-        <div>
-          <div className="file-grid">
-            {files.map((file) => 
-              <FileItem
-                isNew={newCreationSheetName.some((sheetName) => file.name.includes(sheetName))}
-                key={file.id}
-                file={file}
-                onSelect={() => {
-                  if (file.scriptUrl) {
-                    handleStoreEndpoint(file.scriptUrl);
-                  }
-                }} />
-            )}
-          </div>
-        </div>
-        
-        <button className="secondary" onClick={() => fetchFiles('moneybook-')} disabled={loading} style={{ alignSelf: 'center', marginTop: '20px' }}>
-           Refresh List
+      {/* List Header */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', padding: '0 4px' }}>
+        <h3 style={{ margin: 0, fontSize: '1.1rem', color: 'var(--text-secondary)', fontWeight: '500' }}>Existing Books</h3>
+        <button 
+          onClick={() => fetchFiles('moneybook-')} 
+          disabled={loading} 
+          style={{ 
+            background: 'transparent',
+            border: 'none',
+            color: 'var(--primary)',
+            cursor: loading ? 'wait' : 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            fontSize: '0.9rem',
+            padding: '4px 8px',
+            borderRadius: '4px'
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--bg-item)'}
+          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+        >
+          <span className="material-icons" style={{ fontSize: '18px', animation: loading ? 'spin 1s linear infinite' : 'none' }}>refresh</span>
+          Refresh
+          {loading && <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>}
         </button>
       </div>
+
+      {/* List Section */}
+      <div className="file-grid" style={{ marginTop: 0 }}>
+        {files.map((file) => 
+          <FileItem
+            isNew={newCreationSheetName.some((sheetName) => file.name.includes(sheetName))}
+            key={file.id}
+            file={file}
+            onSelect={() => {
+              if (file.scriptUrl) {
+                handleStoreEndpoint(file.scriptUrl);
+              }
+            }} />
+        )}
+      </div>
+      
+      {files.length === 0 && !loading && (
+        <div style={{ textAlign: 'center', color: 'var(--text-secondary)', padding: '2rem' }}>
+          No books found. Create one above!
+        </div>
+      )}
     </div>
   );
 };

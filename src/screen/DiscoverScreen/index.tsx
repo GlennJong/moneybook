@@ -82,7 +82,7 @@ const DiscoverScreen = ({ transactions }: DiscoverScreenProps) => {
     const tagMap = new Map<string, number>();
     currentPeriodTx.forEach(t => {
         const validTags = t.tags?.filter(tag => tag && tag.trim() !== '') || [];
-        const tag = validTags.length > 0 ? validTags[0] : 'Uncategorized';
+        const tag = validTags.length > 0 ? validTags[0] : 'unknown';
         tagMap.set(tag, (tagMap.get(tag) || 0) + t.price);
     });
     
@@ -157,11 +157,22 @@ const DiscoverScreen = ({ transactions }: DiscoverScreenProps) => {
                         cx="50%"
                         cy="50%"
                         labelLine={false}
-                        outerRadius={80}
+                        outerRadius={100}
                         fill="#8884d8"
                         dataKey="value"
                         stroke="var(--bg-card)" // Add stroke to separate segments
-                        label={({ name, percent }) => `${name} ${((percent ?? 0) * 100).toFixed(0)}%`}
+                        label={({ x, y, cx, name, percent }) => (
+                            <text 
+                                x={x} 
+                                y={y} 
+                                fill="var(--text-secondary)" 
+                                textAnchor={x > cx ? 'start' : 'end'} 
+                                dominantBaseline="central" 
+                                style={{ fontSize: '11px', fontWeight: '500' }}
+                            >
+                                {`${name} ${((percent ?? 0) * 100).toFixed(0)}%`}
+                            </text>
+                        )}
                     >
                         {reportData.pieData.map((_entry, index) => (
                             <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />

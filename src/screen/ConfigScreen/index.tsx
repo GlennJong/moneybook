@@ -75,7 +75,7 @@ const ConfigScreen = ({ onSync, isSyncing = false, pendingCount = 0 }: ConfigScr
             type="number"
             inputMode="numeric"
             min="0"
-            style={{ width: '100%', padding: '8px', fontSize: '16px', backgroundColor: 'var(--input-bg)', color: 'var(--text-main)', border: '1px solid var(--border-color)', borderRadius: '4px' }}
+            style={{ width: '100%', padding: '8px', fontSize: '16px', backgroundColor: 'var(--input-bg)', color: 'var(--text-main)', border: '1px solid var(--border-color)', borderRadius: '4px', boxSizing: 'border-box' }}
             value={maxTags}
             onChange={handleMaxTagsChange}
           />
@@ -92,7 +92,7 @@ const ConfigScreen = ({ onSync, isSyncing = false, pendingCount = 0 }: ConfigScr
             type="number"
             inputMode="numeric"
             min="0"
-            style={{ width: '100%', padding: '8px', fontSize: '16px', backgroundColor: 'var(--input-bg)', color: 'var(--text-main)', border: '1px solid var(--border-color)', borderRadius: '4px' }}
+            style={{ width: '100%', padding: '8px', fontSize: '16px', backgroundColor: 'var(--input-bg)', color: 'var(--text-main)', border: '1px solid var(--border-color)', borderRadius: '4px', boxSizing: 'border-box' }}
             value={bigPurchaseThreshold}
             onChange={handleThresholdChange}
           />
@@ -100,6 +100,34 @@ const ConfigScreen = ({ onSync, isSyncing = false, pendingCount = 0 }: ConfigScr
             Transactions above this amount will be considered "Big Purchases".
           </p>
         </div>
+      </div>
+
+      <div className="card" style={{ padding: '20px', border: '1px solid var(--border-color)', borderRadius: '8px', marginTop: '20px', backgroundColor: 'var(--bg-card)' }}>
+        <h3 style={{ marginTop: 0, color: 'var(--danger)' }}>Danger Zone</h3>
+        <p style={{ color: 'var(--text-secondary)' }}>
+          This will remove all local data and log you out. Unsynced changes will be lost.
+        </p>
+        <button
+            onClick={() => {
+                if(confirm('Are you sure you want to clear all data and logout? This cannot be undone.')) {
+                    localStorage.clear();
+                    window.location.reload();
+                }
+            }}
+            style={{
+                width: '100%',
+                padding: '12px',
+                backgroundColor: 'var(--danger)',
+                color: 'white',
+                border: 'none',
+                borderRadius: '6px',
+                fontSize: '16px',
+                cursor: 'pointer',
+                fontWeight: 'bold'
+            }}
+        >
+            Leave & Clear Data
+        </button>
       </div>
     </div>
   );
