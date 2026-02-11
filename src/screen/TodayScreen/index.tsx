@@ -5,9 +5,10 @@ interface TodayScreenProps {
   transactions: Transaction[];
   removeTransaction: (id: string) => void;
   onEdit: (tx: Transaction) => void;
+  highlightedId?: string | null;
 }
 
-const TodayScreen = ({ transactions, removeTransaction, onEdit }: TodayScreenProps) => {
+const TodayScreen = ({ transactions, removeTransaction, onEdit, highlightedId }: TodayScreenProps) => {
 
   useEffect(() => {
     // Scroll to top on mount
@@ -62,20 +63,36 @@ const TodayScreen = ({ transactions, removeTransaction, onEdit }: TodayScreenPro
       </div>
 
       <div className="transaction-list">
+        <style>{`
+          @keyframes flash-normal {
+            0% { background-color: var(--primary-bg-subtle); } 
+            100% { background-color: var(--bg-item); }
+          }
+          @keyframes flash-warning {
+             0% { background-color: var(--primary-bg-subtle); }
+             100% { background-color: var(--warning-bg-subtle); }
+          }
+        `}</style>
         {todayTransactions.length === 0 ? (
           <div style={{ textAlign: 'center', color: 'var(--text-muted)', marginTop: '40px' }}>
             No transactions yet today.
           </div>
         ) : (
-          todayTransactions.map(tx => (
+          todayTransactions.map(tx => {
+            const isPlanned = tx.price === 0;
+            const isHighlighted = highlightedId === tx.id;
+            const bgStart = isPlanned ? 'var(--warning-bg-subtle)' : 'var(--bg-item)';
+            
+            return (
             <div 
               key={tx.id} 
               onClick={() => onEdit(tx)}
               style={{ 
-                backgroundColor: tx.price === 0 ? 'var(--warning-bg-subtle)' : 'var(--bg-item)', // Yellow background for planned
+                backgroundColor: bgStart,
+                animation: isHighlighted ? `${isPlanned ? 'flash-warning' : 'flash-normal'} 3s ease-out` : 'none',
                 padding: '15px', 
                 borderRadius: '8px',
-                border: tx.price === 0 ? '1px solid var(--warning)' : '1px solid var(--border-color)',
+                border: isPlanned ? '1px solid var(--warning)' : '1px solid var(--border-color)',
                 marginBottom: '10px',
                 display: 'flex', 
                 justifyContent: 'space-between',
@@ -148,7 +165,8 @@ const TodayScreen = ({ transactions, removeTransaction, onEdit }: TodayScreenPro
                 </div>
               </div>
             </div>
-          ))
+          );
+        })
         )}
       </div>
     </div>

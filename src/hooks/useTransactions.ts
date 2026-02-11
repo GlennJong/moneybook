@@ -163,6 +163,7 @@ export const useTransactions = (scriptUrl: string | null) => {
     };
 
     setPendingTasks(prev => [...prev, task]);
+    return newTx.id;
   }, []);
 
   const updateTransaction = useCallback(async (id: string, data: Partial<Omit<Transaction, 'id' | 'syncStatus'>>) => {

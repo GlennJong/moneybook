@@ -11,9 +11,6 @@ type CreateTransactionProps = {
 const CreateScreen = ({ onSubmit, transactions = [], initialData, onCancel }: CreateTransactionProps) => {
   const handleCreate = async (data: Omit<Transaction, "id" | "updated_at" | "syncStatus"> & { created_at?: string }) => {
     await onSubmit(data);
-    if (!initialData) {
-      alert('Transaction Added!');
-    }
   };
 
   return (

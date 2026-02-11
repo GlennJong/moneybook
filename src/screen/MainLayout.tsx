@@ -13,6 +13,7 @@ export type Tab = 'list' | 'create' | 'discover' | 'config' | 'today';
 
 const MainLayout = () => {
   const [currentTab, setCurrentTab] = useState<Tab>('today');
+  const [highlightedId, setHighlightedId] = useState<string | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   useLayoutEffect(() => {
@@ -76,14 +77,17 @@ const MainLayout = () => {
             transactions={transactions}
             removeTransaction={removeTransaction}
             onEdit={handleEdit}
+            highlightedId={highlightedId}
           />
         )}
         {currentTab === 'create' && (
           <CreateScreen 
             transactions={transactions}
             onSubmit={async (data) => {
-                 await addTransaction(data);
-                 setCurrentTab('list'); // Navigate back after adding
+                 const newId = await addTransaction(data);
+                 setHighlightedId(newId);
+                 setCurrentTab('today'); // Navigate back after adding
+                 setTimeout(() => setHighlightedId(null), 3000);
             }} 
           />
         )}
