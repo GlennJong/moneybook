@@ -133,11 +133,11 @@ export const useTransactions = (scriptUrl: string | null) => {
 
 
   // Actions
-  const addTransaction = useCallback(async (data: Omit<Transaction, 'id' | 'created_at' | 'updated_at' | 'syncStatus'>) => {
+  const addTransaction = useCallback(async (data: Omit<Transaction, 'id' | 'updated_at' | 'syncStatus'> & { created_at?: string }) => {
     const newTx: Transaction = {
       ...data,
       id: crypto.randomUUID(),
-      created_at: new Date().toISOString(),
+      created_at: data.created_at || new Date().toISOString(),
       updated_at: new Date().toISOString(),
       syncStatus: 'pending'
     };
@@ -165,7 +165,7 @@ export const useTransactions = (scriptUrl: string | null) => {
     setPendingTasks(prev => [...prev, task]);
   }, []);
 
-  const updateTransaction = useCallback(async (id: string, data: Partial<Omit<Transaction, 'id' | 'created_at' | 'syncStatus'>>) => {
+  const updateTransaction = useCallback(async (id: string, data: Partial<Omit<Transaction, 'id' | 'syncStatus'>>) => {
     // Access latest transactions state inside the updater
     setTransactions(currentTransactions => {
         const index = currentTransactions.findIndex(t => t.id === id);

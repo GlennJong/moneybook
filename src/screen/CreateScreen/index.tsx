@@ -3,13 +3,13 @@ import TransactionForm from '../../components/TransactionForm';
 
 type CreateTransactionProps = {
   transactions?: Transaction[];
-  onSubmit: (data: Omit<Transaction, 'id' | 'created_at' | 'updated_at' | 'syncStatus'>) => Promise<void>;
+  onSubmit: (data: Omit<Transaction, 'id' | 'updated_at' | 'syncStatus'> & { created_at?: string }) => Promise<void>;
   initialData?: Transaction | null;
   onCancel?: () => void;
 }
 
 const CreateScreen = ({ onSubmit, transactions = [], initialData, onCancel }: CreateTransactionProps) => {
-  const handleCreate = async (data: Omit<Transaction, "id" | "created_at" | "updated_at" | "syncStatus">) => {
+  const handleCreate = async (data: Omit<Transaction, "id" | "updated_at" | "syncStatus"> & { created_at?: string }) => {
     await onSubmit(data);
     if (!initialData) {
       alert('Transaction Added!');

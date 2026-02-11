@@ -3,7 +3,7 @@ import type { Transaction } from '../types';
 
 type TransactionFormProps = {
   transactions?: Transaction[];
-  onSubmit: (data: Omit<Transaction, 'id' | 'created_at' | 'updated_at' | 'syncStatus'>) => Promise<void>;
+  onSubmit: (data: Omit<Transaction, 'id' | 'updated_at' | 'syncStatus'> & { created_at: string }) => Promise<void>;
   initialData?: Transaction | null;
   onCancel?: () => void;
   submitLabel?: string;
@@ -18,6 +18,14 @@ const TransactionForm = ({ onSubmit, transactions = [], initialData, onCancel, s
   const [newPrice, setNewPrice] = useState(initialData ? String(initialData.price) : '');
   const [tags, setTags] = useState<string[]>(initialData?.tags || []);
   const [tagInput, setTagInput] = useState('');
+  const [createdDate, setCreatedDate] = useState(() => {
+    // Format date for datetime-local input (YYYY-MM-DDThh:mm)
+    const date = initialData ? new Date(initialData.created_at) : new Date();
+    // Adjust for local timezone offset to display correct local time in input
+    const offset = date.getTimezoneOffset() * 60000;
+    const localIso = new Date(date.getTime() - offset).toISOString().slice(0, 16);
+    return localIso;
+  });
   const [isTagsFocused, setIsTagsFocused] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -27,10 +35,19 @@ const TransactionForm = ({ onSubmit, transactions = [], initialData, onCancel, s
       setNewName(initialData.name);
       setNewPrice(String(initialData.price));
       setTags(initialData.tags || []);
+      
+      const date = new Date(initialData.created_at);
+      const offset = date.getTimezoneOffset() * 60000;
+      const localIso = new Date(date.getTime() - offset).toISOString().slice(0, 16);
+      setCreatedDate(localIso);
     } else {
       setNewName('');
       setNewPrice('');
       setTags([]);
+      const date = new Date();
+      const offset = date.getTimezoneOffset() * 60000;
+      const localIso = new Date(date.getTime() - offset).toISOString().slice(0, 16);
+      setCreatedDate(localIso);
     }
   }, [initialData]);
 
@@ -86,7 +103,8 @@ const TransactionForm = ({ onSubmit, transactions = [], initialData, onCancel, s
         name: newName, 
         price: newPrice ? Number(newPrice) : 0, 
         tags: finalTags,
-        description: initialData?.description || '' 
+        description: initialData?.description || '',
+        created_at: new Date(createdDate).toISOString()
       });
       
       if (!initialData) {
@@ -95,6 +113,10 @@ const TransactionForm = ({ onSubmit, transactions = [], initialData, onCancel, s
         setNewPrice('');
         setTags([]);
         setTagInput('');
+        const date = new Date();
+        const offset = date.getTimezoneOffset() * 60000;
+        const localIso = new Date(date.getTime() - offset).toISOString().slice(0, 16);
+        setCreatedDate(localIso);
       }
     } finally {
       setIsSubmitting(false);
@@ -104,6 +126,16 @@ const TransactionForm = ({ onSubmit, transactions = [], initialData, onCancel, s
   return (
     <div className="card" style={{ padding: '20px', border: '1px solid #ccc', borderRadius: '8px', backgroundColor: 'white' }}>
       
+      <div style={{ marginBottom: '15px' }}>
+        <label style={{ display: 'block', marginBottom: '5px' }}>Date & Time</label>
+        <input 
+          type="datetime-local"
+          style={{ width: '100%', padding: '8px', fontSize: '16px' }}
+          value={createdDate}
+          onChange={e => setCreatedDate(e.target.value)}
+        />
+      </div>
+
       <div style={{ marginBottom: '15px' }}>
         <label style={{ display: 'block', marginBottom: '5px' }}>Price ($)</label>
         <input 
