@@ -11,8 +11,8 @@
   --text-secondary: #6c757d;
   --text-muted: #adb5bd;
   --border-color: #dee2e6;
-  --primary: #007bff;
-  --primary-bg-subtle: #e7f1ff;
+  --primary: #2c804e;
+  --primary-bg-subtle: #ebf7ef;
   --danger: #dc3545;
   --success: #198754;
   --warning: #ffc107;
@@ -44,8 +44,8 @@
     --text-secondary: #b0b0b0;
     --text-muted: #666666;
     --border-color: #444444;
-    --primary: #4dabf7;
-    --primary-bg-subtle: #0d2b4a;
+    --primary: #5ec788;
+    --primary-bg-subtle: #163e26;
     --danger: #ff6b6b;
     --success: #51cf66;
     --warning: #fcc419;
