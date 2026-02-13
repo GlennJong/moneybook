@@ -1,13 +1,14 @@
-import { useState, useLayoutEffect, useRef } from "react";
+import { useState, useLayoutEffect, useRef, lazy, Suspense } from "react";
 import type { Transaction } from "../types";
-import ListScreen from "./ListScreen";
-import DiscoverScreen from "./DiscoverScreen";
-import CreateScreen from "./CreateScreen";
-import ConfigScreen from "./ConfigScreen";
 import TodayScreen from "./TodayScreen";
 import BottomNav from "../components/BottomNav";
 import { useTransactions } from "../hooks/useTransactions";
-import TransactionForm from '../components/TransactionForm';
+
+const TransactionForm = lazy(() => import('../components/TransactionForm'));
+const ListScreen = lazy(() => import("./ListScreen"));
+const DiscoverScreen = lazy(() => import("./DiscoverScreen"));
+const CreateScreen = lazy(() => import("./CreateScreen"));
+const ConfigScreen = lazy(() => import("./ConfigScreen"));
 
 export type Tab = 'list' | 'create' | 'discover' | 'config' | 'today';
 
@@ -64,41 +65,47 @@ const MainLayout = () => {
         id="main-scroll-container" 
         style={{ flex: 1, overflowY: 'auto', paddingBottom: 'calc(80px + env(safe-area-inset-bottom))' }}
       >
-        {currentTab === 'list' && (
-          <ListScreen 
-            transactions={transactions}
-            removeTransaction={removeTransaction}
-            syncFromCloud={syncFromCloud}
-            onEdit={handleEdit}
-          />
-        )}
-        {currentTab === 'today' && (
-          <TodayScreen 
-            transactions={transactions}
-            removeTransaction={removeTransaction}
-            onEdit={handleEdit}
-            highlightedId={highlightedId}
-          />
-        )}
-        {currentTab === 'create' && (
-          <CreateScreen 
-            transactions={transactions}
-            onSubmit={async (data) => {
-                 const newId = await addTransaction(data);
-                 setHighlightedId(newId);
-                 setCurrentTab('today'); // Navigate back after adding
-                 setTimeout(() => setHighlightedId(null), 3000);
-            }} 
-          />
-        )}
-        {currentTab === 'discover' && <DiscoverScreen transactions={transactions} />}
-        {currentTab === 'config' && (
-          <ConfigScreen 
-            onSync={pushPendingChanges}
-            isSyncing={isSyncing}
-            pendingCount={pendingTaskCount}
-          />
-        )}
+        <Suspense fallback={
+          <div style={{ display: 'flex', justifyContent: 'center', padding: '20px' }}>
+            <span className="spinner" style={{ width: '24px', height: '24px', border: '3px solid var(--primary)', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></span>
+          </div>
+        }>
+          {currentTab === 'list' && (
+            <ListScreen 
+              transactions={transactions}
+              removeTransaction={removeTransaction}
+              syncFromCloud={syncFromCloud}
+              onEdit={handleEdit}
+            />
+          )}
+          {currentTab === 'today' && (
+            <TodayScreen 
+              transactions={transactions}
+              removeTransaction={removeTransaction}
+              onEdit={handleEdit}
+              highlightedId={highlightedId}
+            />
+          )}
+          {currentTab === 'create' && (
+            <CreateScreen 
+              transactions={transactions}
+              onSubmit={async (data) => {
+                  const newId = await addTransaction(data);
+                  setHighlightedId(newId);
+                  setCurrentTab('today'); // Navigate back after adding
+                  setTimeout(() => setHighlightedId(null), 3000);
+              }} 
+            />
+          )}
+          {currentTab === 'discover' && <DiscoverScreen transactions={transactions} />}
+          {currentTab === 'config' && (
+            <ConfigScreen 
+              onSync={pushPendingChanges}
+              isSyncing={isSyncing}
+              pendingCount={pendingTaskCount}
+            />
+          )}
+        </Suspense>
       </div>
       
       {/* Edit Overlay */}
@@ -114,6 +121,7 @@ const MainLayout = () => {
           overflowY: 'auto',
           padding: '20px'
         }}>
+          <Suspense fallback={<div>Loading form...</div>}>
             <h1>Edit Transaction</h1>
             <TransactionForm
                 transactions={transactions}
@@ -124,6 +132,7 @@ const MainLayout = () => {
                     setEditingTransaction(null);
                 }}
             />
+          </Suspense>
         </div>
       )}
 

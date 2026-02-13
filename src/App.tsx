@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, lazy, Suspense } from 'react';
 import { ReactHooks } from '@glennjong/vibe-sheets';
 import './App.css'
-import SheetSelector from './SheetSelector';
 import MainLayout from './screen/MainLayout';
+
+const SheetSelector = lazy(() => import('./SheetSelector'));
 
 const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
@@ -50,13 +51,19 @@ function App() {
   
   // Handle sheet selection and store vibe_script_url
   return (
-    <SheetSelector
-      token={accessToken}
-      onSelect={(endpoint: string) => {
-        localStorage.setItem('vibe_script_url', endpoint);
-        setSelectedScriptUrl(endpoint);
-      }}
-    />
+    <Suspense fallback={
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+            <span className="spinner" style={{ width: '30px', height: '30px', border: '3px solid var(--primary)', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></span>
+        </div>
+    }>
+      <SheetSelector
+        token={accessToken}
+        onSelect={(endpoint: string) => {
+          localStorage.setItem('vibe_script_url', endpoint);
+          setSelectedScriptUrl(endpoint);
+        }}
+      />
+    </Suspense>
   )
 }
 
